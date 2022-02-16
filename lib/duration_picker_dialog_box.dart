@@ -115,7 +115,8 @@ class _DialPainterNew extends CustomPainter {
       centerPoint,
       radius,
       // Paint()..color = Colors.black,
-      Paint()..color = backgroundColor,
+      // Paint()..color = backgroundColor,
+      Paint()..color = Colors.transparent,
     );
 
     // 肉眼看到的半径，圆心到数字的距离

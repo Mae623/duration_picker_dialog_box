@@ -903,7 +903,7 @@ class _DurationPicker extends State<DurationPicker> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                minutes != 0 ? '当前选择 ${minutes.toString()} 分钟' : '恢复25分钟默认值',
+                minutes != 0 ? '${minutes.toString()}分钟' : '恢复25分钟默认值',
               ),
               SizedBox(
                 height: 10,

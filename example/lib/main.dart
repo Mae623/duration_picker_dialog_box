@@ -37,22 +37,18 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title!),
       ),
       body: Center(
-          child:
-              TextButton(
-            onPressed: () async {
-              showDurationPicker(
-                  context: context,
-                  initialDuration: Duration(
-                      days: 7,
-                      minutes: 32,
-                      hours: 23,
-                      seconds: 54,
-                      milliseconds: 23,
-                      microseconds: 434),
-                  durationPickerMode: DurationPickerMode.Hour);
-            },
-            child: Text("Show Duration Box "),
-          )
+          child: TextButton(
+        onPressed: () async {
+          showDurationPicker(
+            context: context,
+            initialDuration: Duration(minutes: 25),
+            durationPickerMode: DurationPickerMode.Hour,
+            headText: '修改后的选时组件',
+            showFields: false,
+          );
+        },
+        child: Text("Show Duration Box "),
+      )
           // DurationPicker(
           //   duration: _duration,
           //   onChange: (value) {
@@ -63,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
           //   },
           //   //snapToMins: 5,
           // )
-      ),
+          ),
       floatingActionButton: FloatingActionButton(
         tooltip: 'Increment',
         onPressed: () {},

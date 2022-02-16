@@ -904,6 +904,9 @@ class _DurationPicker extends State<DurationPicker> {
               Text(
                 minutes != 0 ? '当前选择 ${minutes.toString()} 分钟' : '恢复25分钟默认值',
               ),
+              SizedBox(
+                height: 10,
+              ),
               Container(
                 //decoration: BoxDecoration(border: Border.all(width: 2)),
                 width: 300,

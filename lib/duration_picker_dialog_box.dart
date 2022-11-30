@@ -638,8 +638,12 @@ class _DurationPickerState extends State<_DurationPickerDialog> {
 
   void _handleDurationChanged(Duration value) {
     setState(() {
-      _selectedDuration = value;
+      _selectedDuration = value.inMinutes == 0 ? Duration(minutes: 60) : value;
     });
+  }
+
+  void _handleInitialValue() {
+    Navigator.pop(context, Duration(minutes: 25));
   }
 
   void _handleCancel() {
@@ -690,17 +694,34 @@ class _DurationPickerState extends State<_DurationPickerDialog> {
       alignment: AlignmentDirectional.centerEnd,
       constraints: const BoxConstraints(minHeight: 42.0),
       padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: OverflowBar(
-        spacing: 2,
-        overflowAlignment: OverflowBarAlignment.end,
-        children: <Widget>[
-          TextButton(
-            onPressed: _handleCancel,
-            child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          OverflowBar(
+            spacing: 2,
+            overflowAlignment: OverflowBarAlignment.start,
+            children: <Widget>[
+              // todo
+              TextButton(
+                onPressed: _handleInitialValue,
+                child: Text('恢复25分钟默认值'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: _handleOk,
-            child: Text(widget.confirmText ?? localizations.okButtonLabel),
+          OverflowBar(
+            spacing: 2,
+            overflowAlignment: OverflowBarAlignment.end,
+            children: <Widget>[
+              TextButton(
+                onPressed: _handleCancel,
+                child:
+                    Text(widget.cancelText ?? localizations.cancelButtonLabel),
+              ),
+              TextButton(
+                onPressed: _handleOk,
+                child: Text(widget.confirmText ?? localizations.okButtonLabel),
+              ),
+            ],
           ),
         ],
       ),
@@ -903,7 +924,7 @@ class _DurationPicker extends State<DurationPicker> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                minutes != 0 ? '${minutes.toString()}分钟' : '恢复25分钟默认值',
+                minutes != 0 ? '${minutes.toString()}分钟' : '60分钟',
               ),
               SizedBox(
                 height: 10,
@@ -1273,6 +1294,7 @@ class _DurationPicker extends State<DurationPicker> {
   }
 
   void updateValue(value) {
+    print(value);
     setState(() {
       currentDurationType = value;
       currentValue = getCurrentValue();

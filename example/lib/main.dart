@@ -40,12 +40,12 @@ class _MyHomePageState extends State<MyHomePage> {
           child: TextButton(
         onPressed: () async {
           showDurationPicker(
-            context: context,
-            initialDuration: Duration(minutes: 25),
-            durationPickerMode: DurationPickerMode.Hour,
-            headText: '修改后的选时组件',
-            showFields: false,
-          );
+              context: context,
+              initialDuration: Duration(minutes: 25),
+              durationPickerMode: DurationPickerMode.Hour,
+              headText: '修改后的选时组件',
+              showFields: false,
+              themeColor: Colors.pinkAccent);
         },
         child: Text("Show Duration Box "),
       )

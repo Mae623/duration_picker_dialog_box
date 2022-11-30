@@ -92,7 +92,8 @@ class _DialPainterNew extends CustomPainter {
     required this.theta,
     required this.textDirection,
     required this.selectedValue,
-  }) : super(repaint: PaintingBinding.instance!.systemFonts);
+    required this.themeColor,
+  }) : super(repaint: PaintingBinding.instance.systemFonts);
 
   final List<_TappableLabel> primaryLabels;
   final List<_TappableLabel> secondaryLabels;
@@ -104,6 +105,7 @@ class _DialPainterNew extends CustomPainter {
   final int selectedValue;
   // 文字的padding
   static const double _labelPadding = 28.0;
+  final Color themeColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -141,8 +143,7 @@ class _DialPainterNew extends CustomPainter {
     }
 
     paintLabels(primaryLabels);
-
-    final Paint selectorPaint = Paint()..color = accentColor;
+    final Paint selectorPaint = Paint()..color = themeColor; //accentColor;
     final Offset focusedPoint = getOffsetForTheta(theta);
     // 指针小圆半径
     const double focusedRadius = _labelPadding - 2.0;
@@ -196,11 +197,13 @@ class _Dial extends StatefulWidget {
     required this.value,
     required this.mode,
     required this.onChanged,
+    required this.themeColor,
   });
 
   final int value;
   final DurationPickerMode mode;
   final ValueChanged<int> onChanged;
+  final Color themeColor;
 
   @override
   _DialState createState() => _DialState();
@@ -574,6 +577,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
           dotColor: theme.colorScheme.surface,
           theta: _theta!.value,
           textDirection: Directionality.of(context),
+          themeColor: widget.themeColor,
         ),
       ),
     );
@@ -599,6 +603,7 @@ class _DurationPickerDialog extends StatefulWidget {
     this.durationPickerMode,
     required this.headText,
     required this.showFields,
+    required this.themeColor,
   }) : super(key: key);
 
   /// The duration initially selected when the dialog is shown.
@@ -621,6 +626,8 @@ class _DurationPickerDialog extends StatefulWidget {
   final String headText;
 
   final bool showFields;
+
+  final Color themeColor;
 
   @override
   _DurationPickerState createState() => new _DurationPickerState();
@@ -652,6 +659,25 @@ class _DurationPickerState extends State<_DurationPickerDialog> {
 
   void _handleOk() {
     Navigator.pop(context, _selectedDuration ?? Duration());
+  }
+
+  MaterialColor createMaterialColor(Color color) {
+    final List<double> strengths = <double>[.05];
+    final Map<int, Color> swatch = <int, Color>{};
+    final int r = color.red, g = color.green, b = color.blue;
+
+    for (int i = 1; i < 10; i++) {
+      strengths.add(0.1 * i);
+    }
+    for (final double strength in strengths) {
+      final double ds = 0.5 - strength;
+      swatch[(strength * 1000).round()] = Color.fromRGBO(
+          r + ((ds < 0 ? r : (255 - r)) * ds).round(),
+          g + ((ds < 0 ? g : (255 - g)) * ds).round(),
+          b + ((ds < 0 ? b : (255 - b)) * ds).round(),
+          1);
+    }
+    return MaterialColor(color.value, swatch);
   }
 
   @override
@@ -687,43 +713,47 @@ class _DurationPickerState extends State<_DurationPickerDialog> {
           duration: _selectedDuration ?? Duration(minutes: 25),
           onChange: _handleDurationChanged,
           showFields: widget.showFields,
+          themeColor: widget.themeColor,
         ));
 
     /// Action Buttons - Cancel and OK
-    final Widget actions = Container(
-      alignment: AlignmentDirectional.centerEnd,
-      constraints: const BoxConstraints(minHeight: 42.0),
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          OverflowBar(
-            spacing: 2,
-            overflowAlignment: OverflowBarAlignment.start,
-            children: <Widget>[
-              // todo
-              TextButton(
-                onPressed: _handleInitialValue,
-                child: Text('恢复25分钟默认值'),
-              ),
-            ],
-          ),
-          OverflowBar(
-            spacing: 2,
-            overflowAlignment: OverflowBarAlignment.end,
-            children: <Widget>[
-              TextButton(
-                onPressed: _handleCancel,
-                child:
-                    Text(widget.cancelText ?? localizations.cancelButtonLabel),
-              ),
-              TextButton(
-                onPressed: _handleOk,
-                child: Text(widget.confirmText ?? localizations.okButtonLabel),
-              ),
-            ],
-          ),
-        ],
+    final Widget actions = Theme(
+      data: ThemeData(primarySwatch: createMaterialColor(widget.themeColor)),
+      child: Container(
+        alignment: AlignmentDirectional.centerEnd,
+        constraints: const BoxConstraints(minHeight: 42.0),
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            OverflowBar(
+              spacing: 2,
+              overflowAlignment: OverflowBarAlignment.start,
+              children: <Widget>[
+                TextButton(
+                  onPressed: _handleInitialValue,
+                  child: Text('恢复25分钟默认值'),
+                ),
+              ],
+            ),
+            OverflowBar(
+              spacing: 2,
+              overflowAlignment: OverflowBarAlignment.end,
+              children: <Widget>[
+                TextButton(
+                  onPressed: _handleCancel,
+                  child: Text(
+                      widget.cancelText ?? localizations.cancelButtonLabel),
+                ),
+                TextButton(
+                  onPressed: _handleOk,
+                  child:
+                      Text(widget.confirmText ?? localizations.okButtonLabel),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
 
@@ -826,6 +856,7 @@ Future<Duration?> showDurationPicker({
   String? cancelText,
   required String headText,
   required bool showFields,
+  required Color themeColor,
 }) async {
   return await showDialog<Duration>(
     context: context,
@@ -837,6 +868,7 @@ Future<Duration?> showDurationPicker({
       cancelText: cancelText,
       headText: headText,
       showFields: showFields,
+      themeColor: themeColor,
     ),
   );
 }
@@ -865,6 +897,7 @@ class DurationPicker extends StatefulWidget {
   final double? width;
   final double? height;
   final bool showFields;
+  final Color themeColor;
 
   DurationPicker({
     this.duration = const Duration(minutes: 25),
@@ -873,6 +906,7 @@ class DurationPicker extends StatefulWidget {
     this.height,
     this.durationPickerMode,
     required this.showFields,
+    required this.themeColor,
   });
 
   @override
@@ -937,6 +971,7 @@ class _DurationPicker extends State<DurationPicker> {
                   value: currentValue,
                   mode: currentDurationType,
                   onChanged: updateDurationFields,
+                  themeColor: widget.themeColor,
                 ),
               ),
               SizedBox(

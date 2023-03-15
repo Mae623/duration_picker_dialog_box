@@ -741,11 +741,17 @@ class _DurationPickerState extends State<_DurationPickerDialog> {
               overflowAlignment: OverflowBarAlignment.end,
               children: <Widget>[
                 TextButton(
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity(horizontal: -4),
+                  ),
                   onPressed: _handleCancel,
                   child: Text(
                       widget.cancelText ?? localizations.cancelButtonLabel),
                 ),
                 TextButton(
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity(horizontal: -4),
+                  ),
                   onPressed: _handleOk,
                   child:
                       Text(widget.confirmText ?? localizations.okButtonLabel),

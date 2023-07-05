@@ -604,6 +604,7 @@ class _DurationPickerDialog extends StatefulWidget {
     required this.headText,
     required this.showFields,
     required this.themeColor,
+    required this.foregroundColor,
   }) : super(key: key);
 
   /// The duration initially selected when the dialog is shown.
@@ -628,6 +629,8 @@ class _DurationPickerDialog extends StatefulWidget {
   final bool showFields;
 
   final Color themeColor;
+
+  final Color foregroundColor;
 
   @override
   _DurationPickerState createState() => new _DurationPickerState();
@@ -697,6 +700,7 @@ class _DurationPickerState extends State<_DurationPickerDialog> {
         style: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.w400,
+          color: widget.foregroundColor,
         ),
       ),
     );
@@ -714,6 +718,7 @@ class _DurationPickerState extends State<_DurationPickerDialog> {
           onChange: _handleDurationChanged,
           showFields: widget.showFields,
           themeColor: widget.themeColor,
+          foregroundColor: widget.foregroundColor,
         ));
 
     /// Action Buttons - Cancel and OK
@@ -853,17 +858,17 @@ void _announceToAccessibility(BuildContext context, String message) {
 ///   cancelText: cancelText,
 ///    );
 /// ```
-Future<Duration?> showDurationPicker({
-  required BuildContext context,
-  required Duration initialDuration,
-  DurationPickerMode? durationPickerMode,
-  bool showHead = true,
-  String? confirmText,
-  String? cancelText,
-  required String headText,
-  required bool showFields,
-  required Color themeColor,
-}) async {
+Future<Duration?> showDurationPicker(
+    {required BuildContext context,
+    required Duration initialDuration,
+    DurationPickerMode? durationPickerMode,
+    bool showHead = true,
+    String? confirmText,
+    String? cancelText,
+    required String headText,
+    required bool showFields,
+    required Color themeColor,
+    required Color foregroundColor}) async {
   return await showDialog<Duration>(
     context: context,
     builder: (BuildContext context) => new _DurationPickerDialog(
@@ -875,6 +880,7 @@ Future<Duration?> showDurationPicker({
       headText: headText,
       showFields: showFields,
       themeColor: themeColor,
+      foregroundColor: foregroundColor,
     ),
   );
 }
@@ -904,6 +910,7 @@ class DurationPicker extends StatefulWidget {
   final double? height;
   final bool showFields;
   final Color themeColor;
+  final Color foregroundColor;
 
   DurationPicker({
     this.duration = const Duration(minutes: 25),
@@ -913,6 +920,7 @@ class DurationPicker extends StatefulWidget {
     this.durationPickerMode,
     required this.showFields,
     required this.themeColor,
+    required this.foregroundColor,
   });
 
   @override
@@ -965,6 +973,7 @@ class _DurationPicker extends State<DurationPicker> {
             children: [
               Text(
                 minutes != 0 ? '${minutes.toString()}分钟' : '60分钟',
+                style: TextStyle(color: widget.foregroundColor),
               ),
               SizedBox(
                 height: 10,

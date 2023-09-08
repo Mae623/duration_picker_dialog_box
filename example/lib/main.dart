@@ -39,18 +39,20 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
           child: TextButton(
         onPressed: () async {
-          showDurationPicker(
+          final a = await showDurationPicker(
             context: context,
             initialDuration: Duration(minutes: 25),
             durationPickerMode: DurationPickerMode.Hour,
-            headText: '修改后的选时组件',
+            /*    headText: '修改后的选时组件',
             showFields: false,
             themeColor: Colors.pinkAccent,
-            foregroundColor: Colors.white,
+            foregroundColor: Colors.white,*/
           );
+          print(a?.inMinutes);
         },
         child: Text("Show Duration Box "),
       )
+
           // DurationPicker(
           //   duration: _duration,
           //   onChange: (value) {

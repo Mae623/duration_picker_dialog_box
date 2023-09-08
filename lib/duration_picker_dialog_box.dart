@@ -28,19 +28,13 @@ const Duration _kDialAnimateDuration = const Duration(milliseconds: 200);
 const double _kDurationPickerWidthPortrait = 650.0;
 const double _kDurationPickerWidthLandscape = 600.0;
 
-const double _kDurationPickerHeightPortrait = 480.0;
-const double _kDurationPickerHeightLandscape = 440.0;
+//const double _kDurationPickerHeightPortrait = 380.0;
+const double _kDurationPickerHeightPortrait = 360.0;
+const double _kDurationPickerHeightLandscape = 310.0;
 
 const double _kTwoPi = 2 * math.pi;
 
-enum DurationPickerMode {
-  Day,
-  Hour,
-  Minute,
-  Second,
-  MilliSecond,
-  MicroSecond,
-}
+enum DurationPickerMode { Day, Hour, Minute, Second, MilliSecond, MicroSecond }
 
 extension _DurationPickerModeExtenstion on DurationPickerMode {
   static const nextItems = {
@@ -92,8 +86,7 @@ class _DialPainterNew extends CustomPainter {
     required this.theta,
     required this.textDirection,
     required this.selectedValue,
-    required this.themeColor,
-  }) : super(repaint: PaintingBinding.instance.systemFonts);
+  }) : super(repaint: PaintingBinding.instance!.systemFonts);
 
   final List<_TappableLabel> primaryLabels;
   final List<_TappableLabel> secondaryLabels;
@@ -103,32 +96,22 @@ class _DialPainterNew extends CustomPainter {
   final double theta;
   final TextDirection textDirection;
   final int selectedValue;
-  // 文字的padding
+
   static const double _labelPadding = 28.0;
-  final Color themeColor;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final double radius = size.shortestSide / 2;
+    final double radius = size.shortestSide / 2.0;
     final Offset center = Offset(size.width / 2.0, size.height / 2.0);
     final Offset centerPoint = center;
-    // 整个表盘的大圆，和转动的半径无关
-    canvas.drawCircle(
-      centerPoint,
-      radius,
-      // Paint()..color = Colors.black,
-      // Paint()..color = backgroundColor,
-      Paint()..color = Colors.transparent,
-    );
+    canvas.drawCircle(centerPoint, radius, Paint()..color = backgroundColor);
 
-    // 肉眼看到的半径，圆心到数字的距离
     final double labelRadius = radius - _labelPadding;
     Offset getOffsetForTheta(double theta) {
       return center +
           Offset(labelRadius * math.cos(theta), -labelRadius * math.sin(theta));
     }
 
-    // 刻画表盘数字刻度
     void paintLabels(List<_TappableLabel> labels) {
       final double labelThetaIncrement = -_kTwoPi / labels.length;
       double labelTheta = math.pi / 2.0;
@@ -143,15 +126,12 @@ class _DialPainterNew extends CustomPainter {
     }
 
     paintLabels(primaryLabels);
-    final Paint selectorPaint = Paint()..color = themeColor; //accentColor;
+
+    final Paint selectorPaint = Paint()..color = accentColor;
     final Offset focusedPoint = getOffsetForTheta(theta);
-    // 指针小圆半径
-    const double focusedRadius = _labelPadding - 2.0;
-    // 表盘中心的圆
+    const double focusedRadius = _labelPadding - 4.0;
     canvas.drawCircle(centerPoint, 4.0, selectorPaint);
-    // 指针小圆
     canvas.drawCircle(focusedPoint, focusedRadius, selectorPaint);
-    // 直线
     selectorPaint.strokeWidth = 2.0;
     canvas.drawLine(centerPoint, focusedPoint, selectorPaint);
 
@@ -197,13 +177,11 @@ class _Dial extends StatefulWidget {
     required this.value,
     required this.mode,
     required this.onChanged,
-    required this.themeColor,
   });
 
   final int value;
   final DurationPickerMode mode;
   final ValueChanged<int> onChanged;
-  final Color themeColor;
 
   @override
   _DialState createState() => _DialState();
@@ -577,7 +555,6 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
           dotColor: theme.colorScheme.surface,
           theta: _theta!.value,
           textDirection: Directionality.of(context),
-          themeColor: widget.themeColor,
         ),
       ),
     );
@@ -594,18 +571,14 @@ class _DurationPickerDialog extends StatefulWidget {
   /// Creates a duration picker.
   ///
   /// [initialTime] must not be null.
-  const _DurationPickerDialog({
-    Key? key,
-    required this.initialDuration,
-    this.cancelText,
-    this.confirmText,
-    this.showHead = true,
-    this.durationPickerMode,
-    required this.headText,
-    required this.showFields,
-    required this.themeColor,
-    required this.foregroundColor,
-  }) : super(key: key);
+  const _DurationPickerDialog(
+      {Key? key,
+      required this.initialDuration,
+      this.cancelText,
+      this.confirmText,
+      this.showHead = true,
+      this.durationPickerMode})
+      : super(key: key);
 
   /// The duration initially selected when the dialog is shown.
   final Duration initialDuration;
@@ -624,14 +597,6 @@ class _DurationPickerDialog extends StatefulWidget {
 
   final DurationPickerMode? durationPickerMode;
 
-  final String headText;
-
-  final bool showFields;
-
-  final Color themeColor;
-
-  final Color foregroundColor;
-
   @override
   _DurationPickerState createState() => new _DurationPickerState();
 }
@@ -648,12 +613,8 @@ class _DurationPickerState extends State<_DurationPickerDialog> {
 
   void _handleDurationChanged(Duration value) {
     setState(() {
-      _selectedDuration = value.inMinutes == 0 ? Duration(minutes: 60) : value;
+      _selectedDuration = value;
     });
-  }
-
-  void _handleInitialValue() {
-    Navigator.pop(context, Duration(minutes: 25));
   }
 
   void _handleCancel() {
@@ -664,25 +625,6 @@ class _DurationPickerState extends State<_DurationPickerDialog> {
     Navigator.pop(context, _selectedDuration ?? Duration());
   }
 
-  MaterialColor createMaterialColor(Color color) {
-    final List<double> strengths = <double>[.05];
-    final Map<int, Color> swatch = <int, Color>{};
-    final int r = color.red, g = color.green, b = color.blue;
-
-    for (int i = 1; i < 10; i++) {
-      strengths.add(0.1 * i);
-    }
-    for (final double strength in strengths) {
-      final double ds = 0.5 - strength;
-      swatch[(strength * 1000).round()] = Color.fromRGBO(
-          r + ((ds < 0 ? r : (255 - r)) * ds).round(),
-          g + ((ds < 0 ? g : (255 - g)) * ds).round(),
-          b + ((ds < 0 ? b : (255 - b)) * ds).round(),
-          1);
-    }
-    return MaterialColor(color.value, swatch);
-  }
-
   @override
   Widget build(BuildContext context) {
     final MaterialLocalizations localizations =
@@ -691,80 +633,43 @@ class _DurationPickerState extends State<_DurationPickerDialog> {
 
     /// Duration Head with heading as Duration.
     final Widget head = Padding(
-      padding: EdgeInsets.only(
-        top: 16,
-        bottom: 8,
-      ),
+      padding: EdgeInsets.only(top: 8),
       child: Text(
-        widget.headText,
+        "Duration".toUpperCase(),
         style: TextStyle(
-          fontSize: 24,
+          fontSize: 16,
           fontWeight: FontWeight.w400,
-          color: widget.foregroundColor,
         ),
       ),
     );
 
     /// Duration Picker Widget.
     final Widget picker = new Padding(
-        padding: const EdgeInsets.only(
-          left: 16.0,
-          right: 16,
-          top: 4,
-          bottom: 4,
-        ),
+        padding:
+            const EdgeInsets.only(left: 16.0, right: 16, top: 8, bottom: 8),
         child: DurationPicker(
-          duration: _selectedDuration ?? Duration(minutes: 25),
+          duration: _selectedDuration ?? Duration(),
           onChange: _handleDurationChanged,
-          showFields: widget.showFields,
-          themeColor: widget.themeColor,
-          foregroundColor: widget.foregroundColor,
         ));
 
     /// Action Buttons - Cancel and OK
-    final Widget actions = Theme(
-      data: ThemeData(primarySwatch: createMaterialColor(widget.themeColor)),
-      child: Container(
-        alignment: AlignmentDirectional.centerEnd,
-        constraints: const BoxConstraints(minHeight: 42.0),
-        padding: const EdgeInsets.symmetric(horizontal: 6),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            OverflowBar(
-              spacing: 2,
-              overflowAlignment: OverflowBarAlignment.start,
-              children: <Widget>[
-                TextButton(
-                  onPressed: _handleInitialValue,
-                  child: Text('恢复25分钟默认值'),
-                ),
-              ],
-            ),
-            OverflowBar(
-              spacing: 2,
-              overflowAlignment: OverflowBarAlignment.end,
-              children: <Widget>[
-                TextButton(
-                  style: TextButton.styleFrom(
-                    visualDensity: VisualDensity(horizontal: -4),
-                  ),
-                  onPressed: _handleCancel,
-                  child: Text(
-                      widget.cancelText ?? localizations.cancelButtonLabel),
-                ),
-                TextButton(
-                  style: TextButton.styleFrom(
-                    visualDensity: VisualDensity(horizontal: -4),
-                  ),
-                  onPressed: _handleOk,
-                  child:
-                      Text(widget.confirmText ?? localizations.okButtonLabel),
-                ),
-              ],
-            ),
-          ],
-        ),
+    final Widget actions = Container(
+      alignment: AlignmentDirectional.centerEnd,
+      constraints: const BoxConstraints(minHeight: 42.0),
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      child: OverflowBar(
+        spacing: 2,
+        overflowAlignment: OverflowBarAlignment.end,
+        children: <Widget>[
+          TextButton(
+            onPressed: _handleCancel,
+            child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
+          ),
+          TextButton(
+            onPressed: _handleOk,
+            child: Text(widget.confirmText ?? localizations.okButtonLabel),
+          ),
+        ],
       ),
     );
 
@@ -864,11 +769,7 @@ Future<Duration?> showDurationPicker(
     DurationPickerMode? durationPickerMode,
     bool showHead = true,
     String? confirmText,
-    String? cancelText,
-    required String headText,
-    required bool showFields,
-    required Color themeColor,
-    required Color foregroundColor}) async {
+    String? cancelText}) async {
   return await showDialog<Duration>(
     context: context,
     builder: (BuildContext context) => new _DurationPickerDialog(
@@ -877,10 +778,6 @@ Future<Duration?> showDurationPicker(
       showHead: showHead,
       confirmText: confirmText,
       cancelText: cancelText,
-      headText: headText,
-      showFields: showFields,
-      themeColor: themeColor,
-      foregroundColor: foregroundColor,
     ),
   );
 }
@@ -908,20 +805,13 @@ class DurationPicker extends StatefulWidget {
 
   final double? width;
   final double? height;
-  final bool showFields;
-  final Color themeColor;
-  final Color foregroundColor;
 
-  DurationPicker({
-    this.duration = const Duration(minutes: 25),
-    required this.onChange,
-    this.width,
-    this.height,
-    this.durationPickerMode,
-    required this.showFields,
-    required this.themeColor,
-    required this.foregroundColor,
-  });
+  DurationPicker(
+      {this.duration = const Duration(minutes: 0),
+      required this.onChange,
+      this.width,
+      this.height,
+      this.durationPickerMode});
 
   @override
   _DurationPicker createState() => _DurationPicker();
@@ -933,7 +823,7 @@ class _DurationPicker extends State<DurationPicker> {
       BoxShadow(color: Color(0x07000000), offset: Offset(3, 0), blurRadius: 12);
   int days = 0;
   int hours = 0;
-  int minutes = 25;
+  int minutes = 0;
   int seconds = 0;
   int milliseconds = 0;
   int microseconds = 0;
@@ -948,6 +838,7 @@ class _DurationPicker extends State<DurationPicker> {
     super.initState();
     currentDurationType =
         widget.durationPickerMode ?? DurationPickerMode.Minute;
+    currentValue = getCurrentValue();
     days = widget.duration.inDays;
     hours = (widget.duration.inHours) % Duration.hoursPerDay;
     minutes = widget.duration.inMinutes % Duration.minutesPerHour;
@@ -958,51 +849,20 @@ class _DurationPicker extends State<DurationPicker> {
         widget.duration.inMicroseconds % Duration.microsecondsPerMillisecond;
     width = widget.width ?? _kDurationPickerWidthLandscape;
     height = widget.height ?? _kDurationPickerHeightLandscape;
-    currentValue = getCurrentValue();
   }
 
   Widget build(BuildContext context) {
-//    _ScreenSize screenSize = getScreenSize(MediaQuery.of(context).size.width);
+    _ScreenSize screenSize = getScreenSize(MediaQuery.of(context).size.width);
     return OrientationBuilder(builder: (context, orientation) {
       return Container(
           width: width,
           height: height,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                minutes != 0 ? '${minutes.toString()}分钟' : '60分钟',
-                style: TextStyle(color: widget.foregroundColor),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Container(
-                //decoration: BoxDecoration(border: Border.all(width: 2)),
-                width: 300,
-                height: 300,
-                child: _Dial(
-                  value: currentValue,
-                  mode: currentDurationType,
-                  onChanged: updateDurationFields,
-                  themeColor: widget.themeColor,
-                ),
-              ),
-              SizedBox(
-                height: 6,
-              ),
-              if (widget.showFields) getFields(),
-            ],
-          ));
-      /* Row(children: [
-             screenSize != _ScreenSize.mobile
+          child: Row(children: [
+            screenSize != _ScreenSize.mobile
                 ? Expanded(
-                    // 网页版，拉长
-                    flex: 5,
-                    child: getDurationFields(context, orientation))
+                    flex: 5, child: getDurationFields(context, orientation))
                 : Container(),
-             currentDurationType == DurationPickerMode.Day &&
+            currentDurationType == DurationPickerMode.Day &&
                     screenSize != _ScreenSize.mobile
                 ? Container()
                 : Expanded(
@@ -1011,10 +871,10 @@ class _DurationPicker extends State<DurationPicker> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                           screenSize == _ScreenSize.mobile
+                          screenSize == _ScreenSize.mobile
                               ? getCurrentSelectionFieldText()
                               : Container(),
-                           screenSize == _ScreenSize.mobile &&
+                          screenSize == _ScreenSize.mobile &&
                                   currentDurationType == DurationPickerMode.Day
                               ? Column(children: [
                                   SizedBox(
@@ -1046,66 +906,26 @@ class _DurationPicker extends State<DurationPicker> {
                                     onChanged: updateDurationFields,
                                   ),
                                 ),
-                          Container(
-                            //decoration: BoxDecoration(border: Border.all(width: 2)),
-                            width: 300,
-                            height: 200,
-                            child: _Dial(
-                              value: currentValue,
-                              mode: currentDurationType,
-                              onChanged: updateDurationFields,
-                            ),
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          if (widget.showFields) getFields(),
-
+                          getFields(),
                         ])),
-            Expanded(
-              flex: 5,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    //decoration: BoxDecoration(border: Border.all(width: 2)),
-                    width: 300,
-                    height: 360,
-                    child: _Dial(
-                      value: currentValue,
-                      mode: currentDurationType,
-                      onChanged: updateDurationFields,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 12,
-                  ),
-                  if (widget.showFields) getFields(),
-                ],
-              ),
-            ),
-          ]))*/
+          ]));
     });
   }
 
   Widget getFields() {
     return Flexible(
         child: Container(
-            padding: EdgeInsets.only(
-              left: 10,
-              right: 10,
-            ),
+            padding: EdgeInsets.only(left: 10, right: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                currentDurationType == DurationPickerMode.Hour
+                currentDurationType == DurationPickerMode.Day
                     ? Container(
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(200),
                             color: Color(0x1E000000)),
                         child: Icon(
-                          Icons.arrow_left_rounded,
+                          Icons.arrow_right_rounded,
                           color: Color(0x42000000),
                           size: 36,
                         ),
@@ -1130,11 +950,10 @@ class _DurationPicker extends State<DurationPicker> {
                             )),
                       ),
                 Text(
-                  currentDurationType == DurationPickerMode.Hour ? '小时' : '分钟',
-                  // describeEnum(currentDurationType),
+                  describeEnum(currentDurationType),
                   style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
                 ),
-                currentDurationType == DurationPickerMode.Minute
+                currentDurationType == DurationPickerMode.MicroSecond
                     ? Container(
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(200),
@@ -1185,7 +1004,7 @@ class _DurationPicker extends State<DurationPicker> {
         width: 100,
         child: Column(
           children: <Widget>[
-            //getCurrentSelectionFieldText(),
+            getCurrentSelectionFieldText(),
             SizedBox(
               height: 10,
             ),
@@ -1344,7 +1163,6 @@ class _DurationPicker extends State<DurationPicker> {
   }
 
   void updateValue(value) {
-    print(value);
     setState(() {
       currentDurationType = value;
       currentValue = getCurrentValue();
